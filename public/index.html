@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gridiron Odds 2026</title>
+  <meta name="description" content="Justified, matchup-adjusted probabilities for NFL player stats in the 2026 season.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><ellipse cx='16' cy='16' rx='14' ry='9' transform='rotate(-35 16 16)' fill='%232a78d6'/><path d='M11 21l10-10M13 15l4 4M15 13l4 4M17 11l4 4' stroke='white' stroke-width='1.6'/></svg>">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="14" ry="9" transform="rotate(-35 16 16)" fill="currentColor"/><path d="M11 21l10-10M13 15l4 4M15 13l4 4M17 11l4 4" stroke="var(--surface)" stroke-width="1.6"/></svg>
+        <div>
+          <div class="brand-name">Gridiron Odds <span class="brand-year">2026</span></div>
+          <div class="brand-sub" id="stamp">Loading data…</div>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="predict" aria-selected="true">Predict</button>
+        <button role="tab" data-tab="board">Weekly board</button>
+        <button role="tab" data-tab="defense">Defense vs position</button>
+        <button role="tab" data-tab="method">Method &amp; accuracy</button>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PREDICT -->
+    <section class="tab-panel" id="tab-predict">
+      <div class="predict-layout">
+        <aside class="card controls">
+          <label class="field">
+            <span class="field-label">Player</span>
+            <div class="search">
+              <input id="playerSearch" type="search" autocomplete="off" placeholder="Search any QB, RB, WR, TE…" role="combobox" aria-expanded="false" aria-controls="playerList">
+              <ul id="playerList" class="search-list" role="listbox" hidden></ul>
+            </div>
+          </label>
+          <div id="playerCard" class="player-card"></div>
+
+          <label class="field">
+            <span class="field-label">Stat</span>
+            <select id="statSelect"></select>
+          </label>
+
+          <div class="field">
+            <span class="field-label">Reach at least…</span>
+            <div class="stepper">
+              <button type="button" id="lineDown" aria-label="Decrease">−</button>
+              <input id="lineInput" type="number" inputmode="decimal" min="0" step="any">
+              <button type="button" id="lineUp" aria-label="Increase">+</button>
+            </div>
+          </div>
+
+          <div class="divider"><span>Matchup</span></div>
+
+          <label class="field">
+            <span class="field-label">Game</span>
+            <select id="gameSelect"></select>
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">Opponent</span>
+              <select id="oppSelect"></select>
+            </label>
+            <div class="field">
+              <span class="field-label">Venue</span>
+              <div class="seg" id="venueSeg">
+                <button type="button" data-v="1">Home</button>
+                <button type="button" data-v="0">Away</button>
+                <button type="button" data-v="">Neutral</button>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">Team spread <abbr title="Points this player's team is favored by. Negative = underdog.">?</abbr></span>
+              <input id="spreadInput" type="number" step="0.5" placeholder="e.g. 3.5">
+            </label>
+            <label class="field">
+              <span class="field-label">Game total <abbr title="Vegas over/under for total points scored">?</abbr></span>
+              <input id="totalInput" type="number" step="0.5" placeholder="e.g. 45.5">
+            </label>
+          </div>
+          <p class="hint" id="lineHint"></p>
+        </aside>
+
+        <div class="results" id="results">
+          <div class="card hero" id="hero"></div>
+          <div class="card">
+            <div class="card-head">
+              <h2>Why: how the projection is built</h2>
+            </div>
+            <ol class="waterfall" id="waterfall"></ol>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h2>Projected outcome distribution</h2>
+                <p class="card-sub" id="distSub"></p>
+              </div>
+              <div class="chart" id="distChart"></div>
+            </div>
+            <div class="card">
+              <div class="card-head">
+                <h2>Game log vs this line</h2>
+                <p class="card-sub" id="logSub"></p>
+              </div>
+              <div class="chart" id="logChart"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h2 id="oppTitle">Opponent defense</h2>
+              <p class="card-sub" id="oppSub"></p>
+            </div>
+            <div id="oppTable" class="table-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOARD -->
+    <section class="tab-panel" id="tab-board" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2>Weekly board</h2>
+          <p class="card-sub">Every active player's chance to clear a line this week, ranked. Click a row for the full breakdown.</p>
+        </div>
+        <div class="filters">
+          <label class="field"><span class="field-label">Week</span><select id="boardWeek"></select></label>
+          <label class="field"><span class="field-label">Position</span>
+            <select id="boardPos"><option value="">All</option><option>QB</option><option>RB</option><option>WR</option><option>TE</option></select>
+          </label>
+          <label class="field"><span class="field-label">Stat</span><select id="boardStat"></select></label>
+          <label class="field"><span class="field-label">At least</span><input id="boardLine" type="number" min="0" step="any"></label>
+        </div>
+        <div class="table-wrap" id="boardTable"></div>
+      </div>
+    </section>
+
+    <!-- DEFENSE -->
+    <section class="tab-panel" id="tab-defense" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2>What each defense allows, by position</h2>
+          <p class="card-sub" id="defSub"></p>
+        </div>
+        <div class="filters">
+          <label class="field"><span class="field-label">Position faced</span>
+            <select id="defPos"><option>QB</option><option selected>RB</option><option>WR</option><option>TE</option></select>
+          </label>
+          <div class="legend-div" aria-hidden="true">
+            <span>Tough</span><i class="ramp"></i><span>Soft</span>
+          </div>
+        </div>
+        <div class="table-wrap" id="defTable"></div>
+      </div>
+    </section>
+
+    <!-- METHOD -->
+    <section class="tab-panel" id="tab-method" hidden>
+      <div class="method" id="method"></div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+  <footer class="foot">
+    Data: <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a> weekly player stats &amp; schedules (Vegas lines included). Probabilities are model estimates, not guarantees.
+  </footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

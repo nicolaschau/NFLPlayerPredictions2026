@@ -1,0 +1,11 @@
+{
+  "built": "2026-10-15 20:35 UTC",
+  "current": 2026,
+  "seasons": [
+    2024,
+    2025,
+    2026
+  ],
+  "lastCompletedWeek": 5,
+  "source": "nflverse (github.com/nflverse/nflverse-data)"
+}
